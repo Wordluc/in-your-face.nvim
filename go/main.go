@@ -7,8 +7,12 @@ import (
 	"os"
 	"strings"
 )
+const visible_alpha=65535
 func adjustColor(c color.Color) (uint8,uint8,uint8){
-	r,g,b,_:=c.RGBA()
+	r,g,b,a:=c.RGBA()
+	if a!=visible_alpha{
+		return 0,0,0
+	}
 	return (uint8)(r),(uint8)(g),(uint8)(b)
 }
 func main(){
@@ -53,5 +57,5 @@ func main(){
 		}
 		fileTo.WriteString(line.String())
 	}
-	fileTo.WriteString(("\033[;0;0m"))
+		fileTo.WriteString(("\033[;0;0m"))
 }
