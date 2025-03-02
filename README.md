@@ -26,9 +26,11 @@ config=function ()
 |  errors >= 5 | max injured  | ![41](https://github.com/user-attachments/assets/36e9ad1e-1981-4713-95c8-df76c2d78fce)|
 ## Future Improvement
 Allow to select your own faces for each errors range.
+
 If you wanna do it now you have to overwrite the files `doom-guy-...txt`, you can use a golang program (inside the go directory) where you have to specify what image convert and where put the result.
   `go run .  "/home/foo/Downloads/11.png" "../doom-guy-injured.txt"`.
-!!The size of the image has to be 48x32
+  
+The size of the image has to be 48x32
 ## Show case
 ![image](https://github.com/user-attachments/assets/5da1cbdc-fbc6-4401-a598-4e8a10fc055e)
 ![image](https://github.com/user-attachments/assets/c69387fe-703a-4398-afbc-c406a47a93d8)
