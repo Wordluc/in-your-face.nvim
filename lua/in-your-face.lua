@@ -3,8 +3,6 @@ local M={}
 ---@class windows_opts
 ---@field x number
 ---@field y number
----@field w number
----@field h number
 
 ---@class opts
 ---@field windows windows_opts
@@ -36,8 +34,8 @@ local open_floating_terminal = function(opt)
 		border = "rounded",
 		row = opt.windows.y+1,
 		col = opt.windows.x,
-		width = opt.windows.w,
-		height = opt.windows.h,
+		width = 48,
+		height = 32,
 	})
 	return vim.api.nvim_open_term(buffer,{})
 end
