@@ -33,4 +33,6 @@ If you wanna do it now you have to overwrite the files `doom-guy-...txt`, you ca
 The size of the image has to be 48x32
 ## Show case
 ![image](https://github.com/user-attachments/assets/5da1cbdc-fbc6-4401-a598-4e8a10fc055e)
-![image](https://github.com/user-attachments/assets/c69387fe-703a-4398-afbc-c406a47a93d8)
+![image](https://github.com/user-attachments/assets/91478009-0f6a-4ceb-a542-3965b5f46d8d)
+
+
