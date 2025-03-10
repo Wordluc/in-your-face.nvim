@@ -8,9 +8,7 @@ config=function ()
 			local opt={
 				windows={
 					x=vim.fn.winwidth(0)-48,
-					y=0,
-					h=32,
-					w=48
+					y=0
 				},
 			}
 			require("in-your-face").setup(opt);
