@@ -42,7 +42,7 @@ local create_floating_terminal = function(opt)
 end
 
 
-local function close()
+M.close=function()
 	pcall(function ()
 		if id_win ~= nil then
 			vim.api.nvim_win_close(id_win, true)
@@ -51,7 +51,6 @@ local function close()
 			vim.api.nvim_del_autocmd(id_autocmd)
 		end
 		if id_buffer ~= nil then
-			print(id_buffer)
 			vim.api.nvim_buf_delete(id_buffer, { force = true })
 		end
 	end)
@@ -63,7 +62,7 @@ end
 
 ---@param opt opts
 M.setup = function(opt)
-	close()
+	M.close()
 
 	local id_last_win = vim.fn.win_getid()
 	create_floating_terminal(opt)
@@ -96,7 +95,7 @@ M.setup = function(opt)
 					end
 					vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-max-injured.txt"))
 				end) then
-				close()
+				M.close()
 			end
 	end
 })
