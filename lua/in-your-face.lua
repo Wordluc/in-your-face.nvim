@@ -71,14 +71,12 @@ M.setup = function(opt)
 	vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-normal.txt"))
 
 	id_autocmd = vim.api.nvim_create_autocmd("DiagnosticChanged", {
-		callback = function(args)
-			local diagnostics = args.data.diagnostics
+		callback = function(_)
 			-- get count of errors
 			local errors = 0
-			for _, diagnostic in ipairs(diagnostics) do
-				if diagnostic.severity == vim.diagnostic.severity.ERROR then
-					errors = errors + 1
-				end
+			errors=vim.diagnostic.count()[vim.diagnostic.severity.ERROR]
+			if errors==nil then
+				errors=0
 			end
 			if not pcall(function()
 					if errors == 0 then
@@ -95,6 +93,7 @@ M.setup = function(opt)
 					end
 					vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-max-injured.txt"))
 				end) then
+				print("Closing in your face")
 				M.close()
 			end
 	end
