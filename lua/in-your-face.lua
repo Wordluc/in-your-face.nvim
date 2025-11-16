@@ -1,12 +1,14 @@
 local M = {}
+local max_madness = 10
+local script_path = debug.getinfo(1, "S").source:sub(2):match(".*/") .. "../faces"
+local ansi_faces = {}
+local current_face = 0
+
 local id_chan, id_win, id_autocmd, id_buffer
 
 ---@class windows_opts
 ---@field y number
 ---@field x number
-
----@class opts
----@field windows windows_opts
 
 local function file_exists(name)
 	local f = io.open(name, "r")
@@ -24,17 +26,24 @@ local get_ansi_code = function(file)
 end
 
 
+---@class opts
+---@field windows windows_opts
+---@field max_madness number?
+
 ---it opens a floating terminal
----@param opt opts
-local create_floating_terminal = function(opt)
+---@param opts opts
+local create_floating_terminal = function(opts)
+	if opts.max_madness ~= nil then
+		max_madness = opts.max_madness
+	end
 	id_buffer = vim.api.nvim_create_buf(true, true)
-	vim.api.nvim_buf_set_name(id_buffer,"Doom Face")
+	vim.api.nvim_buf_set_name(id_buffer, "Doom Face")
 	id_win = vim.api.nvim_open_win(id_buffer, true, {
 		relative = "editor",
 		style = "minimal",
 		border = "rounded",
-		row = opt.windows.y + 1,
-		col = opt.windows.x,
+		row = opts.windows.y + 1,
+		col = opts.windows.x,
 		width = 48,
 		height = 32,
 	})
@@ -42,8 +51,8 @@ local create_floating_terminal = function(opt)
 end
 
 
-M.close=function()
-	pcall(function ()
+M.close = function()
+	pcall(function()
 		if id_win ~= nil then
 			vim.api.nvim_win_close(id_win, true)
 		end
@@ -60,6 +69,33 @@ M.close=function()
 	id_buffer = nil
 end
 
+local function loadFaces()
+	local ansi = {}
+	for _, path in pairs(vim.split(vim.fn.glob(script_path .. "/*"), '\n', { trimempty = true })) do
+		local gravity = vim.split(path, script_path .. "/", { plain = true })[2]
+		gravity = vim.split(gravity, "-", { plain = true })[1]
+
+		ansi[tonumber(gravity)] = get_ansi_code(path)
+	end
+	return ansi
+end
+
+local function updateFace()
+	local errors = 0
+	errors = vim.diagnostic.count()[vim.diagnostic.severity.ERROR]
+	if errors == nil then
+		errors = 0
+	end
+	if errors > max_madness then
+		errors = max_madness
+	end
+	local faces_number = math.floor((#ansi_faces - 1) / max_madness * errors) + 1
+	if faces_number ~= current_face then
+		current_face = faces_number
+		vim.api.nvim_chan_send(id_chan, ansi_faces[current_face])
+	end
+end
+
 ---@param opt opts
 M.setup = function(opt)
 	M.close()
@@ -67,36 +103,12 @@ M.setup = function(opt)
 	local id_last_win = vim.fn.win_getid()
 	create_floating_terminal(opt)
 	vim.api.nvim_set_current_win(id_last_win)
-	local script_path = debug.getinfo(1, "S").source:sub(2):match(".*/")
-	vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-normal.txt"))
-
+	ansi_faces = loadFaces()
+	updateFace()
 	id_autocmd = vim.api.nvim_create_autocmd("DiagnosticChanged", {
 		callback = function(_)
-			-- get count of errors
-			local errors = 0
-			errors=vim.diagnostic.count()[vim.diagnostic.severity.ERROR]
-			if errors==nil then
-				errors=0
-			end
-			if not pcall(function()
-					if errors == 0 then
-						vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-normal.txt"))
-						return
-					end
-					if errors < 3 then
-						vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-injured.txt"))
-						return
-					end
-					if errors < 5 then
-						vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-major-injured.txt"))
-						return
-					end
-					vim.api.nvim_chan_send(id_chan, get_ansi_code(script_path .. "../doom-guy-max-injured.txt"))
-				end) then
-				print("Closing in your face")
-				M.close()
-			end
-	end
-})
+			updateFace()
+		end
+	})
 end
 return M
