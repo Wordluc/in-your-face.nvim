@@ -3,10 +3,18 @@ local max_madness = 10
 local script_path = debug.getinfo(1, "S").source:sub(2):match(".*/") .. "../faces"
 local ansi_faces = {}
 local current_face = 0
+---@type opts
+local default_opts = {
+	window = {
+		x = vim.fn.winwidth(0) - 48,
+		y = 0,
+	},
+	max_madness = 10
+}
 
 local id_chan, id_win, id_autocmd, id_buffer
 
----@class windows_opts
+---@class window_opts
 ---@field y number
 ---@field x number
 
@@ -27,23 +35,21 @@ end
 
 
 ---@class opts
----@field windows windows_opts
+---@field window window_opts?
 ---@field max_madness number?
 
 ---it opens a floating terminal
----@param opts opts
-local create_floating_terminal = function(opts)
-	if opts.max_madness ~= nil then
-		max_madness = opts.max_madness
-	end
+---@param window window_opts
+local create_floating_terminal = function(window)
+	M.close()
 	id_buffer = vim.api.nvim_create_buf(true, true)
 	vim.api.nvim_buf_set_name(id_buffer, "Doom Face")
 	id_win = vim.api.nvim_open_win(id_buffer, true, {
 		relative = "editor",
 		style = "minimal",
 		border = "rounded",
-		row = opts.windows.y + 1,
-		col = opts.windows.x,
+		row = window.y + 1,
+		col = window.x,
 		width = 48,
 		height = 32,
 	})
@@ -67,6 +73,8 @@ M.close = function()
 	id_win = nil
 	id_autocmd = nil
 	id_buffer = nil
+	ansi_faces = {}
+	current_face = -1
 end
 
 local function loadFaces()
@@ -96,12 +104,17 @@ local function updateFace()
 	end
 end
 
----@param opt opts
-M.setup = function(opt)
-	M.close()
+---@param opts opts?
+M.setup = function(opts)
+	if opts == nil then
+		opts = default_opts
+	end
+	if opts.max_madness ~= nil then
+		max_madness = opts.max_madness
+	end
 
 	local id_last_win = vim.fn.win_getid()
-	create_floating_terminal(opt)
+	create_floating_terminal(opts.window)
 	vim.api.nvim_set_current_win(id_last_win)
 	ansi_faces = loadFaces()
 	updateFace()
